@@ -20,7 +20,7 @@ const register = async ctx => {
 
   try {
       const exists = await User.findByUsername(username);
-      
+
       if (exists) {
         ctx.status = 409;
         return;
@@ -38,7 +38,37 @@ const register = async ctx => {
 };
 
 // 로그인
-const login = async ctx => { };
+// /api/auth/login
+const login = async (ctx) => { 
+  const {username, password} = ctx.request.body;
+
+  if (!username || !password) {
+    ctx.status = 401;
+    return;
+  }
+
+  try {
+    const user = await User.findByUsername(username);
+
+    if (!user) {
+      ctx.status = 401;
+      return;
+    }
+
+    const valid = await user.checkPassword(password);
+
+    if (!valid) {
+      ctx.status = 401;
+      return;
+    }
+
+    ctx.body = user.serialize();
+
+  } catch(e) {
+    ctx.throw(500, e);
+  }
+
+};
 
 // 로그인 상태 확인
 const check = async ctx => { };
