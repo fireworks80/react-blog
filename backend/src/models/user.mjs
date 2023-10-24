@@ -17,6 +17,13 @@ UserSchema.methods.checkPassword = async function (password) {
   return bcrypt.compare(password, this.hashedPassword);
 };
 
+UserSchema.methods.serialize = function() {
+  const data = this.toJSON();
+  delete data.hashedPassword;
+
+  return data;
+}
+
 // static methods
 UserSchema.statics.findByUsername = function (username) {
   // this는 model을 가리킨다
