@@ -1,5 +1,7 @@
 import { User } from '../../models/user.js';
 import Joi from 'joi';
+import { setCookie } from '../../lib/setCookie.js';
+
 // 회원 가입
 // /api/auth/register
 const register = async (ctx) => {
@@ -34,10 +36,7 @@ const register = async (ctx) => {
     ctx.body = user.serialize();
     const token = user.generateToken();
 
-    ctx.cookies.set(process.env.COOKIE_NAME, token, {
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      httpOnly: true,
-    });
+    setCookie({ ctx, token });
   } catch (e) {
     ctx.throw(500, e);
   }
@@ -71,10 +70,7 @@ const login = async (ctx) => {
     ctx.body = user.serialize();
     const token = user.generateToken();
 
-    ctx.cookies.set(process.env.COOKIE_NAME, token, {
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      httpOnly: true,
-    });
+    setCookie({ ctx, token });
   } catch (e) {
     ctx.throw(500, e);
   }
