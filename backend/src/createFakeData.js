@@ -1,4 +1,4 @@
-import { Post } from './models/post.mjs';
+import { Post } from './models/post.js';
 
 export const createFakeData = async () => {
   const posts = [...Array(40).keys()].map((index) => ({

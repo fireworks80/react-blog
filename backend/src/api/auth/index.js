@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { register, login, check, logout } from './auth.ctrl.mjs';
+import { register, login, check, logout } from './auth.ctrl.js';
 const auth = new Router();
 
 auth.post('/register', register);

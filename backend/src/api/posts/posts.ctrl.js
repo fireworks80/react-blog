@@ -1,10 +1,10 @@
-import { Post } from "../../models/post.mjs";
-import mongoose from "mongoose";
+import { Post } from '../../models/post.js';
+import mongoose from 'mongoose';
 import Joi from 'joi';
 
 const { ObjectId } = mongoose.Types;
 
-export const checkObjectId = (ctx, next) => { 
+export const checkObjectId = (ctx, next) => {
   const { id } = ctx.params;
 
   if (!ObjectId.isValid(id)) {
@@ -13,7 +13,6 @@ export const checkObjectId = (ctx, next) => {
   }
   return next();
 };
-
 
 /*
 post 작성
@@ -24,7 +23,7 @@ const write = async (ctx) => {
   const schema = Joi.object().keys({
     title: Joi.string().required(),
     body: Joi.string().required(),
-    tags: Joi.array().items(Joi.string()).required()
+    tags: Joi.array().items(Joi.string()).required(),
   });
 
   const { error } = schema.validate(ctx.request.body);
@@ -37,7 +36,7 @@ const write = async (ctx) => {
 
   const { title, body, tags } = ctx.request.body;
 
-  const post = new Post({title, body, tags});
+  const post = new Post({ title, body, tags });
 
   try {
     await post.save();
@@ -57,14 +56,21 @@ const list = async (ctx) => {
   const textMaxLength = 200;
 
   const perPage = (Number(page) - 1) * limit;
-  const sliceBody = (text) => text.length > textMaxLength ? `${text.slice(0, textMaxLength)}...` : text;
+  const sliceBody = (text) =>
+    text.length > textMaxLength ? `${text.slice(0, textMaxLength)}...` : text;
 
   try {
-    const posts = await Post.find().sort({_id: -1}).limit(limit).skip(perPage).exec();
+    const posts = await Post.find()
+      .sort({ _id: -1 })
+      .limit(limit)
+      .skip(perPage)
+      .exec();
     const count = await Post.count();
     console.log(count);
     ctx.set('Last-Page', Math.ceil(count / limit));
-    ctx.body = posts.map(post => post.toJSON()).map(post => ({...post, body: sliceBody(post.body) }));
+    ctx.body = posts
+      .map((post) => post.toJSON())
+      .map((post) => ({ ...post, body: sliceBody(post.body) }));
   } catch (e) {
     ctx.throw(500, e);
   }
@@ -74,9 +80,9 @@ const list = async (ctx) => {
 특정 post 조회
 GET /api/posts/:id
 */
-const read = async(ctx) => {
+const read = async (ctx) => {
   const { id } = ctx.params;
-  const post = await Post.find({_id: id}).exec();
+  const post = await Post.find({ _id: id }).exec();
 
   if (!post) {
     ctx.status = 404;
@@ -97,7 +103,7 @@ DELETE /api/posts/:id
 const remove = async (ctx) => {
   const { id } = ctx.params;
 
-  const index = await Post.findByIdAndDelete({_id: id});
+  const index = await Post.findByIdAndDelete({ _id: id });
 
   if (!index) {
     ctx.status = 404;
@@ -110,19 +116,18 @@ const remove = async (ctx) => {
   ctx.status = 204;
 };
 
-
 /* 
 포스트 수정
 PATCH /api/posts/:id
 {title, body}
 */
 
-const update = async(ctx) => {
+const update = async (ctx) => {
   const { id } = ctx.params;
   const schema = Joi.object().keys({
     title: Joi.string(),
     body: Joi.string(),
-    tags: Joi.array().items(Joi.string())
+    tags: Joi.array().items(Joi.string()),
   });
   const { request } = ctx;
 
@@ -134,7 +139,9 @@ const update = async(ctx) => {
     return;
   }
 
-  const post = await Post.findByIdAndUpdate({_id: id}, request.body, {new: true}).exec();
+  const post = await Post.findByIdAndUpdate({ _id: id }, request.body, {
+    new: true,
+  }).exec();
 
   if (post === -1) {
     ctx.status = 404;
@@ -143,7 +150,6 @@ const update = async(ctx) => {
     };
     return;
   }
-
 
   ctx.body = post;
 };

@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "node src",
-    "start:dev": "nodemon --watch src/ src/index.mjs"
+    "start:dev": "nodemon --watch src/ src/index.js"
   },
   "devDependencies": {
     "eslint": "^8.51.0",
