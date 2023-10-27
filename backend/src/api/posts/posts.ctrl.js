@@ -4,13 +4,38 @@ import Joi from 'joi';
 
 const { ObjectId } = mongoose.Types;
 
-export const checkObjectId = (ctx, next) => {
+export const getPostById = async (ctx, next) => {
   const { id } = ctx.params;
 
   if (!ObjectId.isValid(id)) {
     ctx.status = 400;
     return;
   }
+
+  try {
+    const post = await Post.findById(id);
+    console.log('🚀 ~ file: posts.ctrl.js:17 ~ getPostById ~ post:', post);
+    if (!post) {
+      ctx.status = 404;
+      return;
+    }
+
+    ctx.state.post = post;
+
+    return next();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+export const checkOwnPost = (ctx, next) => {
+  const { user, post } = ctx.state;
+
+  if (post.user._id.toString() !== user._id) {
+    ctx.status = 403;
+    return;
+  }
+
   return next();
 };
 
@@ -36,7 +61,7 @@ const write = async (ctx) => {
 
   const { title, body, tags } = ctx.request.body;
 
-  const post = new Post({ title, body, tags });
+  const post = new Post({ title, body, tags, user: ctx.state.user });
 
   try {
     await post.save();
@@ -81,18 +106,7 @@ const list = async (ctx) => {
 GET /api/posts/:id
 */
 const read = async (ctx) => {
-  const { id } = ctx.params;
-  const post = await Post.find({ _id: id }).exec();
-
-  if (!post) {
-    ctx.status = 404;
-    ctx.body = {
-      message: '포스트가 존재하지 않습니다.',
-    };
-    return;
-  }
-
-  ctx.body = post;
+  ctx.body = ctx.state.post;
 };
 
 /*

@@ -86,6 +86,9 @@ const check = async (ctx) => {
 };
 
 // 로그아웃
-const logout = async (ctx) => {};
+const logout = async (ctx) => {
+  ctx.cookies.set(process.env.COOKIE_NAME);
+  ctx.status = 204;
+};
 
 export { register, login, check, logout };
