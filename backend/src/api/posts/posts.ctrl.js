@@ -76,22 +76,32 @@ const write = async (ctx) => {
 GET /api/posts
 */
 const list = async (ctx) => {
-  const { page = 1 } = ctx.query;
+  const { tag, username, page = 1 } = ctx.query;
   const limit = 10;
   const textMaxLength = 200;
+
+  if (Number(page) < 1) {
+    ctx.status = 400;
+    return;
+  }
+
+  const query = {
+    ...(username ? { 'user.username': username } : {}),
+    ...(tag ? { tags: tag } : {}),
+  };
 
   const perPage = (Number(page) - 1) * limit;
   const sliceBody = (text) =>
     text.length > textMaxLength ? `${text.slice(0, textMaxLength)}...` : text;
 
   try {
-    const posts = await Post.find()
+    const posts = await Post.find(query)
       .sort({ _id: -1 })
       .limit(limit)
       .skip(perPage)
       .exec();
-    const count = await Post.count();
-    console.log(count);
+    const count = await Post.countDocuments(query).exec();
+
     ctx.set('Last-Page', Math.ceil(count / limit));
     ctx.body = posts
       .map((post) => post.toJSON())
